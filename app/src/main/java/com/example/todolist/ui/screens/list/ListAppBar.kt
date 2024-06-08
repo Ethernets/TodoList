@@ -1,9 +1,16 @@
 package com.example.todolist.ui.screens.list
 
 
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.DropdownMenu
@@ -12,7 +19,10 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -21,7 +31,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.todolist.R
@@ -159,10 +173,67 @@ fun DeleteAllAction(
                     onDeleteAllClicked()
                 }
             )
-            
         }
     }
+}
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SearchAppBar(
+    text: String,
+    onTextChanged: (String) -> Unit,
+    onSearchClicked: (String) -> Unit,
+    onCloseClicked: () -> Unit,
+){
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(56.dp),
+        tonalElevation = 6.dp
+    ){
+        TextField(
+            modifier = Modifier.fillMaxWidth(),
+            value = text,
+            onValueChange = { onTextChanged(it) },
+            placeholder = { Text(color = Color.Companion.White, text = stringResource(R.string.search)) },
+            textStyle = TextStyle(fontSize = MaterialTheme.typography.titleLarge.fontSize),
+            singleLine = true,
+            leadingIcon = {
+                IconButton(
+                    modifier = Modifier.alpha(1.0f),
+                    onClick = {}
+                ){
+                    Icon(
+                        imageVector = Icons.Filled.Search,
+                        contentDescription = stringResource(R.string.search)
+                    )
+                }
+            },
+            trailingIcon = {
+                IconButton(
+                    onClick = { onCloseClicked()}
+                ){
+                    Icon(
+                        imageVector = Icons.Filled.Close,
+                        contentDescription = stringResource(R.string.close_search),
+                    )
+                }
+            },
+            keyboardOptions = KeyboardOptions(
+                imeAction = ImeAction.Search,
+            ),
+            keyboardActions = KeyboardActions(onSearch = {
+                onSearchClicked(text)
+            }),
+            colors = TextFieldDefaults.textFieldColors(
+                cursorColor = MaterialTheme.colorScheme.primary,
+                focusedIndicatorColor = Color.Transparent,
+                disabledIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+            )
+        )
+
+    }
 }
 
 @Composable
@@ -173,4 +244,15 @@ fun DefaultAppBarPreview() {
         onSortClicked = {},
         onDeleteAllClicked = {},
         )
+}
+
+@Composable
+@Preview
+private fun SearchAppBarPreview() {
+    SearchAppBar(
+        text = "",
+        onTextChanged = {},
+        onSearchClicked = {},
+        onCloseClicked = {},
+    )
 }

@@ -4,4 +4,6 @@
     <string name="search_action">Search</string>
     <string name="list_action">List</string>
     <string name="delete_all_tasks">Delete all tasks</string>
+    <string name="search">Search</string>
+    <string name="close_search">Arrow Forward</string>
 </resources>
