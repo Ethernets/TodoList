@@ -6,4 +6,5 @@
     <string name="delete_all_tasks">Delete all tasks</string>
     <string name="search">Search</string>
     <string name="close_search">Arrow Forward</string>
+    <string name="empty_content">No tasks found</string>
 </resources>

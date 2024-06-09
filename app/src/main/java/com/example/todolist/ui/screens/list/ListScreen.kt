@@ -1,40 +1,62 @@
 package com.example.todolist.ui.screens.list
 
+import android.util.Log
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import com.example.todolist.R
-
+import com.example.todolist.ui.viewmodels.SharedViewModel
+import com.example.todolist.util.SearchAppBarState
 @Composable
 fun ListScreen(
-    navigateToTaskScreen: (taskId: Int) -> Unit
+    navigateToTaskScreen: (taskId: Int) -> Unit,
+    sharedViewModel: SharedViewModel,
 ) {
+    LaunchedEffect(key1 = true) {
+        sharedViewModel.getAllTasks()
+    }
+
+    val searchAppBarState: SearchAppBarState by sharedViewModel.searchAppBarState
+    val searchTextState: String by sharedViewModel.searchTextState
+    val allTasks by sharedViewModel.allTasks.collectAsState()
+    Log.d("ListScreen", "ListScreen: $allTasks")
     Scaffold(
-        content = {},
         topBar = {
-            ListAppBar()
+            ListAppBar(
+                sharedViewModel = sharedViewModel,
+                searchAppBarState = searchAppBarState,
+                searchTextState = searchTextState,
+            )
         },
+        content = { paddingValues -> ListContent(
+            toDoTask = allTasks,
+            navigateToTaskScreen = navigateToTaskScreen,
+            modifier = Modifier.padding(paddingValues)
+        ) },
         floatingActionButton = {
-            ListFab(navigateToTaskScreen = navigateToTaskScreen)
+            ListFab(onFabClicked = navigateToTaskScreen)
         }
     )
 }
 
 @Composable
 fun ListFab(
-    navigateToTaskScreen: (taskId: Int) -> Unit
+    onFabClicked: (taskId: Int) -> Unit
 ) {
     FloatingActionButton(onClick = {
-        navigateToTaskScreen(-1)
+        onFabClicked(-1)
     }, containerColor = if(!isSystemInDarkTheme())MaterialTheme.colorScheme.onSecondaryContainer
     else MaterialTheme.colorScheme.secondaryContainer
     )  {
@@ -44,10 +66,4 @@ fun ListFab(
             tint = Color.White
         )
     }
-}
-
-@Composable
-@Preview
-private fun ListScreenPreview() {
-    ListScreen(navigateToTaskScreen = {})
 }

@@ -41,14 +41,41 @@ import androidx.compose.ui.unit.dp
 import com.example.todolist.R
 import com.example.todolist.components.PriorityItem
 import com.example.todolist.data.models.Priority
+import com.example.todolist.ui.viewmodels.SharedViewModel
+import com.example.todolist.util.SearchAppBarState
+import com.example.todolist.util.TrailingIconState
 
 @Composable
-fun ListAppBar() {
-    DefaultListBar(
-        onSearchClicked = { },
-        onSortClicked = { },
-        onDeleteAllClicked = { },
-        )
+fun ListAppBar(
+    sharedViewModel: SharedViewModel,
+    searchAppBarState: SearchAppBarState,
+    searchTextState: String,
+) {
+    when (searchAppBarState) {
+        SearchAppBarState.CLOSED -> {
+            DefaultListBar(
+                onSearchClicked = {
+                    sharedViewModel.searchAppBarState.value = SearchAppBarState.OPENED
+                },
+                onSortClicked = { },
+                onDeleteAllClicked = { },
+            )
+        }
+
+        else -> {
+            SearchAppBar(
+                text = searchTextState,
+                onTextChanged = { newText ->
+                    sharedViewModel.searchTextState.value = newText
+                },
+                onSearchClicked = {},
+                onCloseClicked = {
+                    sharedViewModel.searchAppBarState.value = SearchAppBarState.CLOSED
+                    sharedViewModel.searchTextState.value = " "
+                }
+            )
+        }
+    }
 }
 
 
@@ -108,12 +135,12 @@ fun SearchAction(
 @Composable
 fun SortAction(
     onSortClicked: (Priority) -> Unit
-){
+) {
     var expanded by remember { mutableStateOf(false) }
     IconButton(
         modifier = Modifier.size(35.dp),
         onClick = { expanded = true },
-        ){
+    ) {
         Icon(
             imageVector = Icons.AutoMirrored.Filled.List,
             contentDescription = stringResource(
@@ -151,12 +178,12 @@ fun SortAction(
 @Composable
 fun DeleteAllAction(
     onDeleteAllClicked: () -> Unit
-){
+) {
     var expanded by remember { mutableStateOf(false) }
 
     IconButton(
         onClick = { expanded = true }
-    ){
+    ) {
         Icon(
             imageVector = Icons.Filled.Delete,
             contentDescription = stringResource(
@@ -164,10 +191,10 @@ fun DeleteAllAction(
             ),
         )
         DropdownMenu(
-            expanded = expanded, 
+            expanded = expanded,
             onDismissRequest = { expanded = false }) {
             DropdownMenuItem(
-                text = { Text("Delete All Tasks")},
+                text = { Text("Delete All Tasks") },
                 onClick = {
                     expanded = false
                     onDeleteAllClicked()
@@ -184,25 +211,31 @@ fun SearchAppBar(
     onTextChanged: (String) -> Unit,
     onSearchClicked: (String) -> Unit,
     onCloseClicked: () -> Unit,
-){
+) {
+    var trailingIconState by remember { mutableStateOf(TrailingIconState.READY_TO_DELETE) }
     Surface(
         modifier = Modifier
             .fillMaxWidth()
             .height(56.dp),
-        tonalElevation = 6.dp
-    ){
+        tonalElevation = 4.dp
+    ) {
         TextField(
             modifier = Modifier.fillMaxWidth(),
             value = text,
             onValueChange = { onTextChanged(it) },
-            placeholder = { Text(color = Color.Companion.White, text = stringResource(R.string.search)) },
+            placeholder = {
+                Text(
+                    color = Color.Companion.White,
+                    text = stringResource(R.string.search)
+                )
+            },
             textStyle = TextStyle(fontSize = MaterialTheme.typography.titleLarge.fontSize),
             singleLine = true,
             leadingIcon = {
                 IconButton(
                     modifier = Modifier.alpha(1.0f),
                     onClick = {}
-                ){
+                ) {
                     Icon(
                         imageVector = Icons.Filled.Search,
                         contentDescription = stringResource(R.string.search)
@@ -211,8 +244,24 @@ fun SearchAppBar(
             },
             trailingIcon = {
                 IconButton(
-                    onClick = { onCloseClicked()}
-                ){
+                    onClick = {
+                        when (trailingIconState) {
+                            TrailingIconState.READY_TO_DELETE -> {
+                                onTextChanged("")
+                                trailingIconState = TrailingIconState.READY_TO_CLOSE
+                            }
+
+                            TrailingIconState.READY_TO_CLOSE -> {
+                                if (text.isNotEmpty()) {
+                                    onTextChanged("")
+                                } else {
+                                    onCloseClicked()
+                                    trailingIconState = TrailingIconState.READY_TO_DELETE
+                                }
+                            }
+                        }
+                    }
+                ) {
                     Icon(
                         imageVector = Icons.Filled.Close,
                         contentDescription = stringResource(R.string.close_search),
@@ -243,7 +292,7 @@ fun DefaultAppBarPreview() {
         onSearchClicked = {},
         onSortClicked = {},
         onDeleteAllClicked = {},
-        )
+    )
 }
 
 @Composable
