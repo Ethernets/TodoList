@@ -7,4 +7,13 @@
     <string name="search">Search</string>
     <string name="close_search">Arrow Forward</string>
     <string name="empty_content">No tasks found</string>
+    <string name="task_appbar_title">Add Task</string>
+    <string name="back_arrow_content_description">Arrow back</string>
+    <string name="add_action_content_description">Add Action</string>
+    <string name="close_icon">Close Icon</string>
+    <string name="update_action_content_description">Update Icon</string>
+    <string name="dalete_action_content_description">Delete Icon</string>
+    <string name="drop_down_arrow_icon">Drop-Down Arrow Icon</string>
+    <string name="title_task_edit">Title</string>
+    <string name="description_task_edit">Description</string>
 </resources>
