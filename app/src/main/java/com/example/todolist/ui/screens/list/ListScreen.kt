@@ -5,6 +5,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.BottomSheetScaffoldState
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -18,6 +19,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import com.example.todolist.R
 import com.example.todolist.ui.viewmodels.SharedViewModel
+import com.example.todolist.util.Action
 import com.example.todolist.util.SearchAppBarState
 @Composable
 fun ListScreen(
@@ -28,9 +30,12 @@ fun ListScreen(
         sharedViewModel.getAllTasks()
     }
 
+    val action by sharedViewModel.action
+
     val searchAppBarState: SearchAppBarState by sharedViewModel.searchAppBarState
     val searchTextState: String by sharedViewModel.searchTextState
     val allTasks by sharedViewModel.allTasks.collectAsState()
+    sharedViewModel.handleDatabaseActions(action)
     Scaffold(
         topBar = {
             ListAppBar(
@@ -65,4 +70,13 @@ fun ListFab(
             tint = Color.White
         )
     }
+}
+
+@Composable
+fun DisplaySnackBar(
+    handleDatabaseActions: () -> Unit,
+    taskTitle: String,
+    action: Action,
+) {
+
 }
