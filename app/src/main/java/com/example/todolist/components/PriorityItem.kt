@@ -15,7 +15,9 @@ import com.example.todolist.data.models.Priority
 import com.example.todolist.ui.theme.Typography
 
 @Composable
-fun PriorityItem(priority: Priority) {
+fun PriorityItem(
+    priority: Priority,
+) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Canvas(modifier = Modifier.size(16.dp)) {
             drawCircle(color = priority.color)

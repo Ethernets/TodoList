@@ -2,6 +2,7 @@ package com.example.todolist.components
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
@@ -25,8 +26,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.example.todolist.R
 import com.example.todolist.data.models.Priority
@@ -37,15 +40,22 @@ fun PriorityDropDown(
     onPrioritySelected: (Priority) -> Unit,
 ) {
     var expended by remember { mutableStateOf(false) }
-    val angle: Float by animateFloatAsState(targetValue = if (expended) 180f else 0f, label = "FloatAnimation")
+    val angle: Float by animateFloatAsState(
+        targetValue = if (expended) 180f else 0f,
+        label = "FloatAnimation"
+    )
+    var parentSize by remember { mutableStateOf(IntSize.Zero) }
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .onGloballyPositioned { parentSize = it.size }
+            .background(MaterialTheme.colorScheme.background)
             .height(50.dp)
             .clickable { expended = true }
             .border(
                 width = 1.dp,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.0f)//priority.color
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+                shape = MaterialTheme.shapes.small
             ),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -61,7 +71,7 @@ fun PriorityDropDown(
         Text(
             modifier = Modifier.weight(8f),
             text = priority.name,
-            style = MaterialTheme.typography.labelMedium,
+            style = MaterialTheme.typography.bodyMedium,
         )
         IconButton(
             modifier = Modifier
@@ -82,26 +92,14 @@ fun PriorityDropDown(
             expanded = expended,
             onDismissRequest = { expended = false },
         ) {
-            DropdownMenuItem(
-                text = { Text(text = Priority.LOW.name) },
-                onClick = {
-                    expended = false
-                    onPrioritySelected(Priority.LOW)
-                })
-
-            DropdownMenuItem(
-                text = { Text(text = Priority.MEDIUM.name) },
-                onClick = {
-                    expended = false
-                    onPrioritySelected(Priority.MEDIUM)
-                })
-
-            DropdownMenuItem(
-                text = { Text(text = Priority.HIGH.name) },
-                onClick = {
-                    expended = false
-                    onPrioritySelected(Priority.HIGH)
-                })
+            Priority.entries.toTypedArray().slice(0..2).forEach { priority ->
+                DropdownMenuItem(
+                    text = { PriorityItem(priority = priority) },
+                    onClick = {
+                        expended = false
+                        onPrioritySelected(priority)
+                    })
+            }
         }
     }
 }

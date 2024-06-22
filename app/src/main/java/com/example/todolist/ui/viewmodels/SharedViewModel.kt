@@ -1,8 +1,10 @@
 package com.example.todolist.ui.viewmodels
 
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.todolist.data.models.Priority
@@ -24,18 +26,36 @@ import javax.inject.Inject
 class SharedViewModel @Inject constructor(private val todoRepository: TodoRepository) :
     ViewModel() {
     val id: MutableState<Int> = mutableIntStateOf(0)
-    val title: MutableState<String> = mutableStateOf("")
+    var title by mutableStateOf("")
+        private set
     val description: MutableState<String> = mutableStateOf("")
     val priority: MutableState<Priority> = mutableStateOf(Priority.LOW)
 
-    val action: MutableState<Action> = mutableStateOf(Action.NO_ACTION)
+    var action by mutableStateOf(Action.NO_ACTION)
+        private set
 
     private val _allTasks = MutableStateFlow<RequestState<List<ToDoTask>>>(RequestState.Idle)
+    private val _searchedTask = MutableStateFlow<RequestState<List<ToDoTask>>>(RequestState.Idle)
     val searchAppBarState: MutableState<SearchAppBarState> =
         mutableStateOf(SearchAppBarState.CLOSED)
     val searchTextState: MutableState<String> = mutableStateOf("")
 
     val allTasks: StateFlow<RequestState<List<ToDoTask>>> = _allTasks
+    val searchedTask: StateFlow<RequestState<List<ToDoTask>>> = _searchedTask
+
+    fun searchTasks(searchQuery: String) {
+        _searchedTask.value = RequestState.Loading
+        try {
+            viewModelScope.launch {
+                todoRepository.searchDatabase(searchQuery = "%$searchQuery%").collect { searchTasks ->
+                    _searchedTask.value = RequestState.Success(searchTasks)
+                }
+            }
+        } catch (e: IOException) {
+            _searchedTask.value = RequestState.Error(e)
+        }
+        searchAppBarState.value = SearchAppBarState.TRIGGERED
+    }
 
     fun getAllTasks() {
         _allTasks.value = RequestState.Loading
@@ -61,22 +81,23 @@ class SharedViewModel @Inject constructor(private val todoRepository: TodoReposi
         }
     }
 
-    private fun addTask(){
+    private fun addTask() {
         viewModelScope.launch(Dispatchers.IO) {
             val toDoTask = ToDoTask(
-                title = title.value,
+                title = title,
                 description = description.value,
                 priority = priority.value
             )
             todoRepository.addTask(toDoTask)
         }
+        searchAppBarState.value = SearchAppBarState.CLOSED
     }
 
-    private fun updateTask(){
+    private fun updateTask() {
         viewModelScope.launch(Dispatchers.IO) {
             val toDoTask = ToDoTask(
                 id = id.value,
-                title = title.value,
+                title = title,
                 description = description.value,
                 priority = priority.value
             )
@@ -84,15 +105,21 @@ class SharedViewModel @Inject constructor(private val todoRepository: TodoReposi
         }
     }
 
-    private fun deleteTask(){
+    private fun deleteTask() {
         viewModelScope.launch(Dispatchers.IO) {
             val toDoTask = ToDoTask(
                 id = id.value,
-                title = title.value,
+                title = title,
                 description = description.value,
                 priority = priority.value
             )
             todoRepository.deleteTask(toDoTask)
+        }
+    }
+
+    private fun deleteAllTasks() {
+        viewModelScope.launch(Dispatchers.IO) {
+            todoRepository.deleteAllTasks()
         }
     }
 
@@ -101,34 +128,38 @@ class SharedViewModel @Inject constructor(private val todoRepository: TodoReposi
             Action.ADD -> addTask()
             Action.UPDATE -> updateTask()
             Action.DELETE -> deleteTask()
-            Action.DELETE_ALL -> {}//deleteAllTasks()
+            Action.DELETE_ALL -> deleteAllTasks()
             Action.UNDO -> {}
             else -> {}
         }
-        this.action.value = Action.NO_ACTION
+        this.action = Action.NO_ACTION
     }
 
     fun updateTaskFields(selectedTask: ToDoTask?) {
         if (selectedTask != null) {
             id.value = selectedTask.id
-            title.value = selectedTask.title
+            title = selectedTask.title
             description.value = selectedTask.description
             priority.value = selectedTask.priority
         } else {
             id.value = 0
-            title.value = ""
+            title = ""
             description.value = ""
             priority.value = Priority.LOW
         }
     }
 
     fun updateTitle(newTitle: String) {
-        if (newTitle.length <= MAX_TITLE_LENGTH){
-            title.value = newTitle
+        if (newTitle.length <= MAX_TITLE_LENGTH) {
+            title = newTitle
         }
     }
 
     fun validateFields(): Boolean {
-        return title.value.isNotEmpty() && description.value.isNotEmpty()
+        return title.isNotEmpty() && description.value.isNotEmpty()
+    }
+
+    fun updateAction(newAction: Action) {
+        action = newAction
     }
 }

@@ -1,5 +1,6 @@
 package com.example.todolist.ui.screens.list
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,7 +22,9 @@ import com.example.todolist.ui.theme.MediumGray
 @Composable
 fun EmptyContent() {
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -33,7 +36,7 @@ fun EmptyContent() {
         )
         Text(
             text = stringResource(R.string.empty_content),
-            style = MaterialTheme.typography.titleLarge,
+            style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.Bold,
             color = MediumGray
             )
