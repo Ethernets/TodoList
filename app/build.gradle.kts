@@ -62,6 +62,7 @@ dependencies {
 
     implementation(libs.androidx.room)
     implementation(libs.androidx.room.ktx)
+    implementation(libs.androidx.ui.text.google.fonts)
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.google.hilt)
@@ -69,6 +70,7 @@ dependencies {
     implementation(libs.jetbrains.kotlinx.coroutines.core)
     implementation(libs.jetbrains.kotlinx.coroutines.android)
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.core.splashscreen)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

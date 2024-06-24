@@ -35,6 +35,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.todolist.R
+import com.example.todolist.components.DisplayAlertDialog
 import com.example.todolist.components.PriorityItem
 import com.example.todolist.data.models.Priority
 import com.example.todolist.ui.viewmodels.SharedViewModel
@@ -53,7 +54,7 @@ fun ListAppBar(
                 onSearchClicked = {
                     sharedViewModel.searchAppBarState.value = SearchAppBarState.OPENED
                 },
-                onSortClicked = { },
+                onSortClicked = { sharedViewModel.persistSortState(priority = it) },
                 onDeleteAllClicked = {
                     sharedViewModel.updateAction(newAction = Action.DELETE_ALL)
                 },
@@ -87,14 +88,11 @@ fun DefaultListBar(
     TopAppBar(
         title = {
             Text(
-                color = MaterialTheme.colorScheme.onPrimary,
                 text = "To Do List",
                 style = MaterialTheme.typography.headlineMedium
             )
         },
-        colors = TopAppBarDefaults.mediumTopAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primary
-        ),
+        colors = TopAppBarDefaults.mediumTopAppBarColors(),
         actions = {
             ActionsAppBar(
                 onSearchClicked = onSearchClicked,
@@ -111,9 +109,17 @@ fun ActionsAppBar(
     onSortClicked: (Priority) -> Unit,
     onDeleteAllClicked: () -> Unit,
 ) {
+    var openDialog by remember { mutableStateOf(false) }
+    DisplayAlertDialog(
+        title = stringResource(R.string.delete_all_tasks),
+        message = stringResource(R.string.delete_all_tasks_message),
+        openDialog = openDialog,
+        closeDialog = { openDialog = false },
+        onYesClicked = { onDeleteAllClicked() },
+    )
     SearchAction(onSearchClicked = onSearchClicked)
     SortAction(onSortClicked = onSortClicked)
-    DeleteAllAction(onDeleteAllClicked = onDeleteAllClicked)
+    DeleteAllAction(onDeleteAllClicked = { openDialog = true })
 }
 
 @Composable
@@ -126,7 +132,6 @@ fun SearchAction(
             contentDescription = stringResource(
                 R.string.search_action
             ),
-            tint = MaterialTheme.colorScheme.onPrimary
         )
     }
 }
@@ -144,7 +149,6 @@ fun SortAction(
             contentDescription = stringResource(
                 R.string.list_action
             ),
-            tint = MaterialTheme.colorScheme.onPrimary
         )
         DropdownMenu(
             expanded = expanded,
@@ -176,7 +180,6 @@ fun DeleteAllAction(
             contentDescription = stringResource(
                 R.string.delete_all_tasks
             ),
-            tint = MaterialTheme.colorScheme.onPrimary
         )
         DropdownMenu(
             expanded = expanded,
@@ -206,7 +209,9 @@ fun SearchAppBar(
         shadowElevation = 8.dp
     ) {
         TextField(
-            modifier = Modifier.fillMaxWidth().height(16.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(16.dp),
             value = text,
             onValueChange = { onTextChanged(it) },
             placeholder = {

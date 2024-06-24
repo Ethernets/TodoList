@@ -20,4 +20,9 @@
     <string name="no">No</string>
     <string name="delete_task_title">Remove \'%1$s\'?</string>
     <string name="delete_task_message">Are you sure you want to remove \'%1$s\'?</string>
+    <string name="delete_all_tasks_title">Remove all tasks?</string>
+    <string name="delete_all_tasks_message">Are you sure you want to remove all tasks?</string>
+    <string name="delete_icon">delete icon</string>
+    <string name="degree_animation">Degree animation</string>
+    <string name="logo">Logo</string>
 </resources>
